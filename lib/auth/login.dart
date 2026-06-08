@@ -15,33 +15,45 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController password = TextEditingController();
 
   Future<void> login() async {
-    var url = Uri.parse(
-      "http://localhost/flutter_api/auth/login.php",
-    );
-
-    var response = await http.post(
-      url,
-      body: {
-        "email": email.text,
-        "password": password.text,
-      },
-    );
-
-    var data = jsonDecode(response.body);
-    print(data);
-    if (data["status"] == true) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => HomePage(
-            username: data["user"]["username"],
-          ),
-        ),
+    try {
+      var url = Uri.parse(
+        "http://localhost/flutter_api/auth/login.php",
       );
-    } else {
+
+      var response = await http.post(
+        url,
+        body: {
+          "email": email.text,
+          "password": password.text,
+        },
+      );
+
+      var data = jsonDecode(response.body);
+      print(response.body);
+      print(data);
+
+      if (data["status"] == true) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => HomePage(
+              username: data["data"]["user"]["username"],
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data["message"]),
+          ),
+        );
+      }
+    } catch (e) {
+      print(e);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(data["message"]),
+          content: Text("Error: $e"),
         ),
       );
     }
